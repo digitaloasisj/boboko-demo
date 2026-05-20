@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: boboko-backend
+    runtime: node
+    plan: free
+    region: singapore
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Optional: uncomment to require X-Api-Key header
+      # - key: API_KEY
+      #   sync: false
+    autoDeploy: true

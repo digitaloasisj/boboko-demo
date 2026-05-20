@@ -1,0 +1,17 @@
+import React from 'react';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { AuthProvider } from '../src/store/AuthContext';
+import { colors } from '../src/theme';
+
+export default function RootLayout() {
+  return (
+    <SafeAreaProvider>
+      <AuthProvider>
+        <StatusBar style="light" backgroundColor={colors.primary} />
+        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: colors.background } }} />
+      </AuthProvider>
+    </SafeAreaProvider>
+  );
+}

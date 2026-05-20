@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Boboko Persib",
+    "slug": "boboko-persib",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "boboko",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": {
+      "backgroundColor": "#0046AD",
+      "resizeMode": "contain"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.boboko.persib"
+    },
+    "android": {
+      "package": "com.boboko.persib",
+      "adaptiveIcon": {
+        "backgroundColor": "#0046AD"
+      },
+      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Aplikasi membutuhkan akses foto untuk upload bukti pembayaran dan identitas anggota."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
