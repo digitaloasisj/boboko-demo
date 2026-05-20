@@ -83,13 +83,16 @@ beberapa registrasi & pembayaran, status sinkronisasi, audit log, notifikasi).
 
 ```
 boboko-persib/
-├── backend/                            # Express + cors, deploy gratis
-│   ├── server.js                       # KV API (/kv/:key, /reset, /health)
+├── backend/                            # Dua varian, satu protokol
+│   ├── cloudflare/                     # ⭐ Cloudflare Workers + KV (GRATIS, no CC)
+│   │   ├── worker.js                   # ~80 baris, edge serverless
+│   │   ├── wrangler.toml
+│   │   └── README.md                   # Step-by-step deploy
+│   ├── server.js                       # Node.js Express versi
 │   ├── package.json
-│   ├── render.yaml                     # One-click deploy ke Render
-│   ├── fly.toml                        # Deploy ke Fly.io
+│   ├── fly.toml                        # Deploy ke Fly.io ($5 credit/bulan)
 │   ├── Dockerfile                      # Untuk VPS / Docker
-│   └── README.md                       # Instruksi deploy
+│   └── README.md                       # Pilihan hosting + instruksi deploy
 ├── app/                                # Expo Router file-based routes
 │   ├── _layout.tsx                     # Root: SafeArea + AuthProvider + Stack
 │   ├── index.tsx                       # Splash → routes ke login/dashboard
@@ -180,11 +183,25 @@ Lalu pilih salah satu:
 Saat APK terinstall, defaultnya **mode offline**: tiap HP punya datanya sendiri.
 Untuk demo client jarak jauh (multi-device), aktifkan **mode online**:
 
+### Pilihan hosting backend GRATIS (update 2026)
+
+Render, Heroku, Railway sudah **tidak free** lagi. Yang masih benar-benar gratis di 2026:
+
+| Opsi | Gratis? | Kartu Kredit? | Sleep? |
+|---|---|---|---|
+| **Cloudflare Workers + KV** ⭐ | ✅ 100k req/hari | ❌ | ❌ |
+| Glitch | ✅ | ❌ | ✅ (5 menit) |
+| Fly.io | $5 credit/bulan | ✅ | ❌ |
+| Koyeb | ✅ 1 service | ❌ | ❌ |
+
+**Rekomendasi: Cloudflare Workers** — selalu warm, tanpa CC, deploy 5 menit.
+Detail di [backend/cloudflare/README.md](backend/cloudflare/README.md).
+
 ### Skenario A — Client tinggal install APK, lalu konfigurasi backend di app
 
-1. Deploy backend Anda terlebih dulu (lihat **[backend/README.md](backend/README.md)** —
-   Render gratis, ~3 menit).
-2. Salin URL backend, mis. `https://boboko-backend-xxxx.onrender.com`.
+1. Deploy backend Anda (~5 menit di Cloudflare Workers — lihat
+   [backend/cloudflare/README.md](backend/cloudflare/README.md)).
+2. Salin URL backend, mis. `https://boboko-backend.<account>.workers.dev`.
 3. Build APK seperti biasa (`eas build -p android --profile preview`).
 4. Bagikan APK + URL backend ke client.
 5. Client install APK → login (`admin` / password apa saja) → **Tab "Lainnya"
@@ -196,7 +213,7 @@ Untuk demo client jarak jauh (multi-device), aktifkan **mode online**:
 Tanam URL ke APK supaya client tidak perlu setting apa pun:
 
 ```bash
-EXPO_PUBLIC_API_URL=https://boboko-backend-xxxx.onrender.com \
+EXPO_PUBLIC_API_URL=https://boboko-backend.<account>.workers.dev \
 eas build -p android --profile preview
 ```
 
@@ -236,7 +253,7 @@ di HP Android, install, dan langsung jalan.
 #### Sertakan URL backend di APK
 
 ```bash
-EXPO_PUBLIC_API_URL=https://boboko-backend.onrender.com \
+EXPO_PUBLIC_API_URL=https://boboko-backend.<account>.workers.dev \
 eas build -p android --profile preview
 ```
 
@@ -363,11 +380,12 @@ Setelah login → tab **Lainnya → Pengaturan → Reset Data Demo**.
 
 | Masalah | Solusi |
 |---|---|
-| "Tes Koneksi" gagal di Render free | Container mungkin sedang cold-start. Tunggu 30 detik dan coba lagi. |
-| Data hilang setelah Render idle 15 menit | Free tier tanpa persistent disk. Pilih Fly.io atau Render paid. |
+| "Tes Koneksi" gagal di Glitch | App mungkin sedang sleep. Buka URL di browser 1× untuk wake, lalu tes lagi. |
+| Data hilang setelah idle lama (Glitch) | Pakai Cloudflare Workers (KV persisten) atau Fly.io (volume persisten). |
 | APK install diblokir Android "tidak diketahui" | Aktifkan **Pengaturan → Keamanan → Install dari sumber tidak dikenal**. |
 | Mode online tidak muncul setelah simpan URL | Logout dulu, lalu login ulang. App membaca mode saat startup. |
 | 401 unauthorized | API_KEY backend tidak cocok dengan field "API Key" di Pengaturan. |
+| Cloudflare deploy gagal "namespace not found" | Pastikan `wrangler kv:namespace create` sudah dijalankan dan id-nya ditempel ke `wrangler.toml`. |
 
 ---
 

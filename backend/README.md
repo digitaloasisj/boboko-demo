@@ -1,7 +1,13 @@
 # Boboko Backend
 
-Backend ringan untuk aplikasi mobile Boboko Persib. Single-file Express server
-yang menyimpan data JSON ke disk lokal.
+Backend ringan untuk aplikasi mobile Boboko Persib. Tersedia **dua varian**:
+
+| Varian | Lokasi | Hosting | Free Tier (2026) |
+|---|---|---|---|
+| **Cloudflare Workers + KV** ⭐ | [`cloudflare/`](cloudflare/) | Cloudflare edge, serverless | 100% gratis, tanpa CC, tidak sleep |
+| Node.js + Express | file [`server.js`](server.js) | VPS / Fly.io / Glitch / Docker | Bervariasi, lihat tabel di bawah |
+
+Keduanya pakai protokol HTTP yang sama:
 
 ```
 GET    /health         → status & jumlah kunci
@@ -11,71 +17,95 @@ DELETE /kv/:key        → hapus key
 POST   /reset          → wipe semua data
 ```
 
-## Lokal
+Aplikasi mobile tidak peduli varian mana — selama URL bisa dijangkau dan respons sesuai.
+
+---
+
+## Pilihan Hosting Gratis (Update 2026)
+
+| Opsi | Gratis? | CC? | Persisten? | Sleep? | Setup |
+|---|---|---|---|---|---|
+| **Cloudflare Workers** | ✅ 100k req/hari | ❌ tidak perlu | ✅ via Workers KV | ❌ tidak | ~5 menit |
+| **Glitch.com** | ✅ | ❌ | ✅ (disk kecil) | ✅ 5 menit idle | ~2 menit |
+| **Fly.io** | $5 credit/bulan | ✅ wajib | ✅ volume 3GB | ❌ | ~10 menit |
+| **Koyeb** | ✅ 1 service | ❌ | ✅ | ❌ | ~10 menit |
+| **Vercel** | ✅ serverless | ❌ | ❌ (perlu external KV) | ❌ | Butuh adapter |
+| ~~Render~~ | ~~❌ free web service~~ | – | – | – | (sudah berbayar) |
+| ~~Heroku~~ | ~~❌~~ | – | – | – | (sudah berbayar) |
+| ~~Railway~~ | ~~❌~~ | – | – | – | (sudah berbayar) |
+
+**Rekomendasi: Cloudflare Workers** — paling stabil untuk demo jangka panjang,
+tidak pernah sleep, tidak perlu kartu kredit.
+
+---
+
+## Opsi 1 — Cloudflare Workers (REKOMENDASI) ⭐
+
+100% gratis, edge global, tidak pernah sleep, tanpa kartu kredit.
 
 ```bash
-cd backend
+cd backend/cloudflare
 npm install
-npm start             # default port 3000
+npx wrangler login                              # OAuth via browser
+npx wrangler kv:namespace create boboko-kv      # salin id ke wrangler.toml
+npx wrangler deploy                             # selesai
 ```
 
-Tes:
-```bash
-curl http://localhost:3000/health
+Output:
+```
+✨ https://boboko-backend.<account>.workers.dev
 ```
 
-## Variabel Lingkungan
+**Detail lengkap step-by-step**: [`cloudflare/README.md`](cloudflare/README.md).
 
-| Variabel    | Default     | Keterangan                                  |
-|-------------|-------------|---------------------------------------------|
-| `PORT`      | `3000`      | Port server                                 |
-| `API_KEY`   | _kosong_    | Jika diisi, klien harus kirim header `X-Api-Key` |
-| `DATA_DIR`  | `__dirname` | Lokasi file `db.json`                       |
+---
 
-## Deploy Gratis
+## Opsi 2 — Glitch.com (paling cepat, tapi sleep)
 
-### Opsi 1 — Render (paling mudah, tanpa kartu kredit)
+Gratis tanpa CC, namun app sleep setelah ~5 menit idle (wake ~3 detik).
 
-1. Push folder `boboko-persib` ke GitHub.
-2. Buka [render.com](https://render.com) → **New +** → **Blueprint**.
-3. Pilih repo Anda. Render akan membaca `backend/render.yaml` otomatis.
-4. Klik **Apply**. Tunggu ~3 menit.
-5. Salin URL service, mis. `https://boboko-backend-xxxx.onrender.com`.
-6. Tes: buka URL itu di browser → harus muncul `{"ok":true,"service":"boboko-backend"}`.
+1. Buka [glitch.com](https://glitch.com/) → **New Project** → **Import from GitHub**
+2. Tempel URL repo: `https://github.com/digitaloasisj/boboko-demo`
+3. Klik **OK**. Glitch akan auto-deploy dari folder root.
+4. Karena server ada di `backend/`, edit `package.json` root agar `main` & `scripts.start` ngarah ke `backend/server.js`. Atau import langsung folder `backend/` (gunakan **From Glitch project URL** dengan `?path=backend`).
+5. URL publik: `https://<project-name>.glitch.me`
 
-> Free tier Render: container di-recycle setelah ~15 menit tanpa traffic. File
-> `db.json` lokal akan hilang saat itu, dan aplikasi akan otomatis re-seed
-> saat ada akses berikutnya. Cocok untuk demo. Untuk persistensi penuh,
-> upgrade ke paid (\$7/mo, dengan disk).
+Saran: pakai Cloudflare kalau ingin always-on. Pakai Glitch hanya untuk demo singkat.
 
-### Opsi 2 — Fly.io (256MB volume persisten gratis)
+---
+
+## Opsi 3 — Fly.io ($5 credit/bulan, butuh kartu kredit)
+
+Free credit $5/bulan cukup untuk 3 VM kecil + 3GB volume — tidak akan tertagih
+untuk skala demo. Volume persisten, tidak sleep.
 
 ```bash
-brew install flyctl     # atau curl -L https://fly.io/install.sh | sh
-fly auth signup         # 1x
+brew install flyctl                     # atau curl -L https://fly.io/install.sh | sh
+fly auth signup                         # CC required (no charge)
 
 cd backend
-fly launch --copy-config --name boboko-backend --region sin
-fly volumes create boboko_data --size 1 --region sin
+fly launch --copy-config --name boboko-backend --region sin --no-deploy
+fly volumes create boboko_data --size 1 --region sin --yes
 fly deploy
-fly status              # ambil URL https://boboko-backend.fly.dev
+
+fly status                              # ambil URL https://boboko-backend.fly.dev
 ```
 
-Data persisten selamanya (gratis hingga 3 VM kecil + 3GB volume).
+Konfigurasi sudah ada di [`fly.toml`](fly.toml).
 
-### Opsi 3 — Glitch (paling cepat untuk demo singkat)
+---
 
-1. Buka [glitch.com/edit](https://glitch.com/edit) → **New Project** → **Import from GitHub**.
-2. Masukkan URL repo.
-3. Edit `package.json` agar `main` & `scripts.start` mengarah ke `backend/server.js`.
-4. URL publik langsung tersedia: `https://<project-name>.glitch.me`.
+## Opsi 4 — Koyeb (1 service gratis, tanpa CC)
 
-### Opsi 4 — Railway / Koyeb / Cyclic
+1. Daftar di [koyeb.com](https://www.koyeb.com/) (sign-in via GitHub).
+2. **Create Service** → **GitHub** → pilih repo Anda.
+3. **Source directory**: `backend`. Build command: `npm install`. Run command: `node server.js`.
+4. Plan: **Free (eco)**. Region: Singapore atau Frankfurt.
+5. Deploy → dapat URL `https://<name>-<id>.koyeb.app`.
 
-Sama prinsipnya. Deteksi Node.js otomatis. Set root directory ke `backend`,
-start command `node server.js`.
+---
 
-### Opsi 5 — Self-host di VPS / Synology / Docker
+## Opsi 5 — Self-host (VPS / Synology / Docker)
 
 ```bash
 cd backend
@@ -83,17 +113,45 @@ docker build -t boboko-backend .
 docker run -d -p 3000:3000 -v boboko-data:/app --name boboko boboko-backend
 ```
 
-## Setelah deploy
+Atau langsung node:
+```bash
+cd backend
+npm install
+node server.js
+```
 
-1. Salin URL backend Anda (tanpa trailing `/`).
-2. Buka aplikasi di HP.
-3. **Pengaturan → Backend Online** → tempel URL → **Tes Koneksi** → **Simpan & Aktifkan**.
-4. Lakukan langkah ini di setiap perangkat (Admin Pusat & semua Distrik).
-5. Sekarang semua data tersinkron antar perangkat.
+Expose lewat reverse proxy (nginx, Caddy, traefik) + domain Anda.
+
+---
+
+## Variabel Lingkungan
+
+Berlaku untuk varian Node Express (`server.js`):
+
+| Variabel    | Default     | Keterangan                                   |
+|-------------|-------------|----------------------------------------------|
+| `PORT`      | `3000`      | Port server                                  |
+| `API_KEY`   | _kosong_    | Jika diisi, klien harus kirim `X-Api-Key`    |
+| `DATA_DIR`  | `__dirname` | Lokasi file `db.json`                        |
+
+Untuk Cloudflare Workers, set lewat:
+- `wrangler secret put API_KEY` (untuk API_KEY)
+- KV namespace binding di `wrangler.toml`
+
+---
+
+## Pakai di Aplikasi
+
+1. Buka app → **Pengaturan → Backend Online**
+2. Tempel URL backend (tanpa trailing `/`)
+3. **Tes Koneksi** → harus sukses
+4. **Simpan & Aktifkan** → login ulang
+5. Lakukan di setiap perangkat (Admin Pusat, Distrik, dst)
+6. Sekarang semua data tersinkron antar perangkat
 
 ## Reset Data Online
 
-Dari aplikasi (Pengaturan → Reset Data Demo), atau via curl:
+Dari aplikasi (Pengaturan → Reset Data Demo) atau:
 ```bash
-curl -X POST https://your-backend-url/reset
+curl -X POST https://<backend-url>/reset
 ```

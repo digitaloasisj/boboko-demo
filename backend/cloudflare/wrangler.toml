@@ -1,0 +1,13 @@
+name = "boboko-backend"
+main = "worker.js"
+compatibility_date = "2024-12-01"
+
+# Ganti id dengan KV namespace yang Anda buat (lihat README).
+[[kv_namespaces]]
+binding = "KV"
+id = "REPLACE_WITH_YOUR_KV_ID"
+
+# Opsional: enkripsi API key dengan `wrangler secret put API_KEY`
+# Bila di-set, klien harus kirim header X-Api-Key.
+# [vars]
+# API_KEY = "..."
