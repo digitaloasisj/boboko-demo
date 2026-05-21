@@ -15,10 +15,10 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.boboko.persib"
+      "bundleIdentifier": "id.bobotoh.kolot"
     },
     "android": {
-      "package": "com.boboko.persib",
+      "package": "id.bobotoh.kolot",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0046AD"
