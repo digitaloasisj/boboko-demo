@@ -8,6 +8,7 @@ import {
   ScrollView,
   Alert,
   Pressable,
+  Image,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
@@ -64,8 +65,12 @@ export default function LoginScreen() {
       >
         <ScrollView contentContainerStyle={styles.scroll}>
           <View style={styles.header}>
-            <View style={styles.logo}>
-              <Text style={styles.logoText}>BP</Text>
+            <View style={styles.logoBox}>
+              <Image
+                source={require('../../assets/logo-display.png')}
+                style={styles.logo}
+                resizeMode="contain"
+              />
             </View>
             <Text style={styles.appName}>Boboko Persib</Text>
             <Text style={styles.tagline}>Manajemen Keanggotaan Komunitas Persib</Text>
@@ -130,16 +135,22 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.primary },
   scroll: { flexGrow: 1, padding: spacing.lg, justifyContent: 'center' },
   header: { alignItems: 'center', marginBottom: spacing.lg },
-  logo: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
+  logoBox: {
+    width: 120,
+    height: 120,
+    borderRadius: 20,
     backgroundColor: colors.white,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: spacing.md,
+    padding: 6,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 6,
   },
-  logoText: { color: colors.primary, fontWeight: '800', fontSize: 26 },
+  logo: { width: '100%', height: '100%' },
   appName: { color: colors.white, fontSize: fontSize.xxl, fontWeight: '700' },
   tagline: { color: '#CFE0FF', fontSize: fontSize.sm, marginTop: 4 },
   modeBadge: {
