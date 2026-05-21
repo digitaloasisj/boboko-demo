@@ -20,7 +20,11 @@
       "adaptiveIcon": {
         "backgroundColor": "#0046AD"
       },
-      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+      "permissions": [
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -33,10 +37,19 @@
         {
           "photosPermission": "Aplikasi membutuhkan akses foto untuk upload bukti pembayaran dan identitas anggota."
         }
-      ]
+      ],
+      "expo-font"
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "e8c43e55-420a-4499-bc8c-11a9d11fe182"
+      }
     }
   }
 }
