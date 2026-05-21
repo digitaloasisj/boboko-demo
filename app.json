@@ -7,7 +7,9 @@
     "scheme": "boboko",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/splash-icon.png",
       "backgroundColor": "#0046AD",
       "resizeMode": "contain"
     },
@@ -18,6 +20,7 @@
     "android": {
       "package": "com.boboko.persib",
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#0046AD"
       },
       "permissions": [
@@ -28,7 +31,8 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static"
+      "output": "static",
+      "favicon": "./assets/favicon.png"
     },
     "plugins": [
       "expo-router",
